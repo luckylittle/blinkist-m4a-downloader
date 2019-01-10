@@ -2,13 +2,25 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/gocolly/colly"
 )
 
+// variables
 var baseURL = "https://www.blinkist.com"
+var filename = "books_urls.txt"
+var username = "xxxxx@xxxxxx.xx" // !!! change to your e-mail address
+var password = "xxxxxxx"         // !!! enter your password here
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
 
 func main() {
 	// links to 27 categories containing all of the books
@@ -48,7 +60,7 @@ func main() {
 	)
 
 	// authenticate
-	err := c.Post("https://www.blinkist.com/en/nc/login/", map[string]string{"username": "XXX", "password": "XXX"})
+	err := c.Post("https://www.blinkist.com/en/nc/login/", map[string]string{"username": username, "password": password})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,20 +71,64 @@ func main() {
 	})
 
 	// on every a element which has href attribute call callback
+	os.Create("temp")
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		// if link starts with /en/books return from callback
 		if !strings.HasPrefix(link, baseURL+"/en/books") {
 			return
 		}
-		// print link
-		fmt.Println(link)
-		// visit link found on page
-		e.Request.Visit(link)
+		// print links to file
+		f, err := os.OpenFile("temp", os.O_APPEND|os.O_WRONLY, 0600)
+		if err != nil {
+			panic(err)
+		}
+
+		defer f.Close()
+
+		if _, err = f.WriteString(link + "\n"); err != nil {
+			panic(err)
+		}
 	})
 
 	// start scraping
 	for _, url := range categories {
 		c.Visit(url)
 	}
+
+	// start removing duplicate entries
+	os.Create(filename)
+	line, _ := ioutil.ReadFile("temp")
+	strLine := string(line)
+	lines := strings.Split(strLine, "\n")
+	resultSlice := removeDuplicates(lines)
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		log.Println(err)
+	}
+	for i := range resultSlice {
+		f.Write([]byte(resultSlice[i] + "\n"))
+	}
+	f.Close()
+	os.Remove("temp")
+}
+
+func removeDuplicates(s []string) []string {
+	counter := 0
+	m := make(map[string]bool)
+	for _, item := range s {
+		if _, ok := m[item]; ok {
+			// duplicate item
+			counter++
+			fmt.Println(item, "is a duplicate", "#", counter)
+		} else {
+			m[item] = true
+		}
+	}
+
+	var result []string
+	for item := range m {
+		result = append(result, item)
+	}
+	return result
 }
