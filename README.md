@@ -4,7 +4,7 @@
 
 - Golang `1.10.2` or higher.
 - Blinkist (https://www.blinkist.com) Premium account.
-- Roughly 20 GB of free disk space (1,767 books as of Thu, Jan 10 2019, on average 10MB per book - but not all of them have audio).
+- Roughly 20 GB of free disk space (1,771 books as of Fri, Jan 11 2019, on average 10MB per book - but not all of them have audio).
 
 ## Configuration
 
@@ -12,8 +12,8 @@ Enter your username and password in `blinkist/main.go`, lines #16, #17.
 
 ## Application
 
-- Run `go run main.go` inside `blinkist` folder to produce `books_urls.txt`, the list of unduplicated URLs of all of the books.
-- Run `go run download.go` inside `download` folder to start downloading audio files from the above URLs.
+- Run `go run main.go` inside `blinkist/` folder to produce `books_urls.txt`, the list of unduplicated URLs of all of the books.
+- Run `go run download.go` inside `download/` folder to start downloading audio files from the above URLs.
 
 ## Technical details of the solution
 

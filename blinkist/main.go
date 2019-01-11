@@ -86,7 +86,7 @@ func main() {
 
 		defer f.Close()
 
-		if _, err = f.WriteString(link + "\n"); err != nil {
+		if _, err = f.WriteString(strings.Replace(link, "/en/books", "/en/nc/reader", -1) + "\n"); err != nil {
 			panic(err)
 		}
 	})
