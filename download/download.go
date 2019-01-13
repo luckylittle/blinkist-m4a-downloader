@@ -7,13 +7,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/gocolly/colly"
 )
 
 // variables
-var email = "XXXX"    // !!! change to your e-mail address
-var password = "XXXX" // !!! enter your password here
+var (
+	email    = "XXXX" // !!! change to your e-mail address
+	password = "XXXX" // !!! enter your password here
+)
 
 func main() {
 	// open the file
@@ -60,24 +63,42 @@ func main() {
 		// create another collector to scrape book details
 		bookCollector := c.Clone()
 
+		// defining variables outside the function and then assign the value in the callback later
+		var dataTitle string
+		var dataBookID string
+
 		// scrape it baby scrape it!
 		// read book title
 		bookCollector.OnHTML("div[class=reader__container__share] a[class=share__facebook-icon]", func(f *colly.HTMLElement) {
-			dataTitle := f.Attr("data-title")
+			dataTitle = f.Attr("data-title")
 			fmt.Println("Book title is:", dataTitle)
+			return
 		})
 
 		// read book ID
 		bookCollector.OnHTML("div[class=reader__container]", func(g *colly.HTMLElement) {
-			dataBookID := g.Attr("data-book-id")
+			dataBookID = g.Attr("data-book-id")
 			fmt.Println("Book ID is:", dataBookID)
+			return
 		})
 
 		// read chapters and corresponding IDs
 		bookCollector.OnHTML("div.chapter", func(h *colly.HTMLElement) {
 			dataChapterNo := h.Attr("data-chapterno")
 			dataChapterID := h.Attr("data-chapterid")
-			fmt.Println("Chapter", dataChapterNo, "has ID:", dataChapterID)
+			apiLink := "https://www.blinkist.com/api/books/" + dataBookID + "/chapters/" + dataChapterID + "/audio"
+			fmt.Println("API Link:" + apiLink + " for chapter " + dataTitle + "/" + dataChapterNo)
+			bookCollector.Visit(apiLink)
+			bookCollector.OnResponse(func(r *colly.Response) {
+				log.Println("Book response received HTTP", r.StatusCode)
+				log.Println("Visited", r.Request.URL)
+				if r.StatusCode == 200 {
+					os.Mkdir(dataTitle, 0700)
+					wget(string(r.Body), dataTitle+"/"+"0"+dataChapterNo+".m4a")
+				} else {
+					log.Println("Doesn't contain audio!")
+				}
+			})
 		})
 
 		// attach callbacks after data title
@@ -92,10 +113,22 @@ func main() {
 		bookCollector.OnScraped(func(r *colly.Response) {
 			fmt.Println("Finished", r.Request.URL)
 		})
+
+		// display collector's statistics
+		log.Println(bookCollector)
 	}
 
 	// if reading the file fails
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// call shell command `wget`` to download from URL. `wget` needs to be installed already and in $PATH
+func wget(url, filepath string) error {
+	// run shell `wget <URL> -O <FILEPATH>`
+	cmd := exec.Command("wget", url, "-O", filepath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
