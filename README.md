@@ -8,12 +8,15 @@
 
 ## Configuration
 
-Enter your username and password in `blinkist/main.go`, lines #16, #17.
+Enter your username and password in:
+
+1. `blinkist/main.go`, lines #16, #17.
+2. `download/download.go`, lines #17, #18.
 
 ## Application
 
 - Run `go run main.go` inside `blinkist/` folder to produce `books_urls.txt`, the list of unduplicated URLs of all of the books.
-- Run `go run download.go` inside `download/` folder to start downloading audio files from the above URLs.
+- Run `go run download.go` inside `download/` folder to start downloading audio files from the above URLs. `books_urls.txt` must be present in the `download/` folder!
 
 ## Technical details of the solution
 
@@ -40,4 +43,3 @@ Enter your username and password in `blinkist/main.go`, lines #16, #17.
 `Bad Blood/002.m4a`,... .
 
 ---
-_This is currently work in progress (Thu Jan 10 14:42:44 AEDT 2019)._
