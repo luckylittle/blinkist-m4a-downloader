@@ -1,13 +1,13 @@
-// WORK IN PROGRESS
-
 package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/gocolly/colly"
 )
@@ -36,8 +36,6 @@ func main() {
 		// get the authenticity token
 		c.OnHTML("div.loginV2--login div[class=loginV2__form] input[type=hidden][name=authenticity_token]", func(e *colly.HTMLElement) {
 			authenticityToken := e.Attr("value")
-			fmt.Println("Logging in...")
-			fmt.Println("authenticity_token for", scanner.Text(), "is", authenticityToken)
 
 			// authenticate
 			err := c.Post("https://www.blinkist.com/en/nc/login/", map[string]string{"utf8": "&#x2713;", "authenticity_token": authenticityToken, "login[google_id_token]": "", "login[facebook_access_token]": "", "login[email]": email, "login[password]": password})
@@ -51,7 +49,6 @@ func main() {
 
 		// attach callbacks after login
 		c.OnResponse(func(r *colly.Response) {
-			log.Print("Login response received HTTP", r.StatusCode)
 			log.Println("Visited", r.Request.URL)
 		})
 
@@ -66,6 +63,11 @@ func main() {
 		// defining variables outside the function and then assign the value in the callback later
 		var dataTitle string
 		var dataBookID string
+		var s []string
+
+		type URL struct {
+			URL string
+		}
 
 		// scrape it baby scrape it!
 		// read book title
@@ -78,27 +80,27 @@ func main() {
 		// read book ID
 		bookCollector.OnHTML("div[class=reader__container]", func(g *colly.HTMLElement) {
 			dataBookID = g.Attr("data-book-id")
-			fmt.Println("Book ID is:", dataBookID)
+			//fmt.Println("Book ID is:", dataBookID)
 			return
 		})
 
 		// read chapters and corresponding IDs
 		bookCollector.OnHTML("div.chapter", func(h *colly.HTMLElement) {
+			var link URL
 			dataChapterNo := h.Attr("data-chapterno")
 			dataChapterID := h.Attr("data-chapterid")
 			apiLink := "https://www.blinkist.com/api/books/" + dataBookID + "/chapters/" + dataChapterID + "/audio"
 			fmt.Println("API Link:" + apiLink + " for chapter " + dataTitle + "/" + dataChapterNo)
-			bookCollector.Visit(apiLink)
 			bookCollector.OnResponse(func(r *colly.Response) {
-				log.Println("Book response received HTTP", r.StatusCode)
-				log.Println("Visited", r.Request.URL)
 				if r.StatusCode == 200 {
-					os.Mkdir(dataTitle, 0700)
-					wget(string(r.Body), dataTitle+"/"+"0"+dataChapterNo+".m4a")
+					json.Unmarshal([]byte(r.Body), &link)
 				} else {
 					log.Println("Doesn't contain audio!")
 				}
 			})
+			bookCollector.Visit(apiLink)
+			s = append(s, link.URL)
+			return
 		})
 
 		// attach callbacks after data title
@@ -113,6 +115,18 @@ func main() {
 		bookCollector.OnScraped(func(r *colly.Response) {
 			fmt.Println("Finished", r.Request.URL)
 		})
+
+		// download the files
+		for index, element := range s {
+			if _, err := os.Stat(dataTitle); os.IsNotExist(err) {
+				os.Mkdir(dataTitle, 0700)
+			} else {
+				log.Println("Folder already exist, investigate!")
+			}
+			var url = element
+			var path = dataTitle + "/" + "0" + strconv.Itoa(index) + ".m4a"
+			wget(url, path)
+		}
 
 		// display collector's statistics
 		log.Println(bookCollector)
