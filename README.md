@@ -1,17 +1,21 @@
 # Blinkist M4A Downloader
 
+## What is Blinkist.com
+
+- Listen to key ideas from the world's best non-fiction books in just 15 minutes.
+
 ## Requirements
 
 - Golang `1.10.2` or higher.
 - Blinkist (https://www.blinkist.com) Premium account.
-- Roughly 20 GB of free disk space (1,771 books as of Fri, Jan 11 2019, on average 10MB per book - but not all of them have audio).
+- Roughly 25 GB of free disk space.
 
 ## Configuration
 
 Enter your username and password in:
 
-1. `blinkist/main.go`, lines #16, #17.
-2. `download/download.go`, lines #17, #18.
+1. `blinkist/main.go`, lines **#16**, **#17**.
+2. `download/download.go`, lines **#17**, **#18**.
 
 ## Application
 
@@ -42,4 +46,13 @@ Enter your username and password in:
 `Bad Blood/001.m4a`,
 `Bad Blood/002.m4a`,... .
 
----
+## Stats
+
+|Item|Size|
+|----|----|
+|Categories|27|
+|Books|1,771|
+|Books with Audio|1,576|
+|Books missing Audio|195|
+|No. of m4a files|14,646|
+|All files size|26,473,732,000 B (25.2GB)|
