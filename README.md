@@ -1,5 +1,10 @@
 # Blinkist M4A Downloader
 
+[![Build Status](https://travis-ci.org/luckylittle/blinkist-m4a-downloader.svg?branch=master)](https://travis-ci.org/luckylittle/blinkist-m4a-downloader)
+[![GitHub license](https://img.shields.io/github/license/luckylittle/blinkist-m4a-downloader.svg)](https://github.com/luckylittle/blinkist-m4a-downloader/blob/master/LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)](https://github.com/luckylittle/blinkist-m4a-downloader/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/luckylittle/blinkist-m4a-downloader)](https://goreportcard.com/report/github.com/luckylittle/blinkist-m4a-downloader)
+
 ## What is Blinkist.com
 
 - Listen to key ideas from the world's best non-fiction books in just 15 minutes.
