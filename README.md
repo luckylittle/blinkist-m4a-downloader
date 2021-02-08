@@ -14,6 +14,7 @@
 - Golang `1.10.2` or higher.
 - Blinkist (https://www.blinkist.com) Premium account.
 - Roughly 25 GB of free disk space.
+- wget installed and setup in PATH
 
 ## Configuration
 
