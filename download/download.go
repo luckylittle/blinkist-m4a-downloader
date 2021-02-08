@@ -31,7 +31,8 @@ func main() {
 	for scanner.Scan() {
 
 		// instantiate default collector
-		c := colly.NewCollector()
+		c := colly.NewCollector(colly.MaxDepth(2), colly.Async(true))
+		c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 2})
 
 		// get the authenticity token
 		c.OnHTML("div.loginV2--login div[class=loginV2__form] input[type=hidden][name=authenticity_token]", func(e *colly.HTMLElement) {
