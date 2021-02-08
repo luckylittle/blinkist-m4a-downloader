@@ -71,7 +71,7 @@ func main() {
 
 		// scrape it baby scrape it!
 		// read book title
-		bookCollector.OnHTML("div[class=reader__container__share] a[class=share__facebook-icon]", func(f *colly.HTMLElement) {
+		bookCollector.OnHTML("div.reader__container a.share__facebook-icon", func(f *colly.HTMLElement) {
 			dataTitle = f.Attr("data-title")
 			fmt.Println("Book title is:", dataTitle)
 			return
@@ -98,6 +98,12 @@ func main() {
 					log.Println("Doesn't contain audio!")
 				}
 			})
+
+
+			bookCollector.OnRequest(func(r *colly.Request) {
+				r.Headers.Set("X-Requested-With", "XMLHttpRequest")
+			})
+
 			bookCollector.Visit(apiLink)
 			s = append(s, link.URL)
 			return
